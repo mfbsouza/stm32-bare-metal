@@ -4,11 +4,9 @@ Bare metal programming of a STM32F103xx using Open Source GNU Toolchain
 
 ## Sections
 
-- [The Toolchain](#toolchain)
+- [The Toolchain](#the-toolchain)
 
----
-
-## The Toolchain {toolchain}
+## The Toolchain
 
 - GNU gcc
 - GNU ld

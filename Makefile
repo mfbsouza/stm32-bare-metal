@@ -18,7 +18,7 @@ OBJECTS = $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
 # https://gcc.gnu.org/onlinedocs/gcc-10.2.0/gcc/ARM-Options.html#ARM-Options
 CC = arm-none-eabi-gcc
 CFLAGS = -Wall -O0 -mcpu=cortex-m3 -mthumb
-LDFLAGS = -nostdlib - T stm32f101xx_ls.ld -Wl,-Map=memory.map
+LDFLAGS = -nostdlib -T stm32f103xx_ls.ld -Wl,-Map=memory.map
 
 # Linking
 

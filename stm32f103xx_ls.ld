@@ -14,21 +14,21 @@ SECTIONS
         *(.isr_vector)
         *(.text)
         *(.rodata)
-        . = ALIGN(4)
-        _end_text =.;
-    } >FLASH
+        . = ALIGN(4);
+        _end_text = .;
+    }> FLASH
 
     .data : {
         _start_data = .;
         *(.data)
-        . = ALIGN(4)
+        . = ALIGN(4);
         _end_data = .;
     }> SRAM AT> FLASH
 
     .bss : {
         _start_bss = .;
         *(.bss)
-        . = ALIGN(4)
+        . = ALIGN(4);
         _end_bss = .;
     }> SRAM
 }
