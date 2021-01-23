@@ -20,27 +20,26 @@ CC = arm-none-eabi-gcc
 CFLAGS = -Wall -O0 -mcpu=cortex-m3 -mthumb
 LDFLAGS = -nostdlib -T stm32f103xx_ls.ld -Wl,-Map=memory.map
 
-all: $(BINDIR)/$(NAME).elf
+all: $(BINDIR)/$(NAME).bin $(BINDIR)/$(NAME).hex
 
-# Linking
+$(BINDIR)/$(NAME).bin: $(BINDIR)/$(NAME).elf
+	arm-none-eabi-objcopy -O binary $< $@
+
+$(BINDIR)/$(NAME).hex: $(BINDIR)/$(NAME).elf
+	arm-none-eabi-objcopy -O ihex $< $@
 
 $(BINDIR)/$(NAME).elf: $(OBJECTS)
 	@mkdir -p $(BINDIR)
 	$(CC) $(LDFLAGS) $^ -o $@
-
-# Compiling
 
 $(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
 	@mkdir -p $(BUILDDIR)
 	$(CC) $(CFLAGS) -c $< -o $@ 
 
 clean:
-	rm -rf $(BUILDDIR) $(BINDIR)
-
-objcopy:
-	arm-none-eabi-objcopy -O binary bin/firmware.elf bin/firmware.bin
+	rm -rf $(BUILDDIR) $(BINDIR) memory.map
 
 flash:
-	stm32flash -w bin/firmware.bin -v $(PORT)
+	stm32flash -w $(BINDIR)/$(NAME).bin -v $(PORT)
 
-.PHONY: all clean objcopy flash
+.PHONY: all clean flash
