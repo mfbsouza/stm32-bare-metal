@@ -20,6 +20,8 @@ CC = arm-none-eabi-gcc
 CFLAGS = -Wall -O0 -mcpu=cortex-m3 -mthumb
 LDFLAGS = -nostdlib -T stm32f103xx_ls.ld -Wl,-Map=memory.map
 
+all: $(BINDIR)/$(NAME).elf
+
 # Linking
 
 $(BINDIR)/$(NAME).elf: $(OBJECTS)
@@ -35,4 +37,10 @@ $(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
 clean:
 	rm -rf $(BUILDDIR) $(BINDIR)
 
-.PHONY: clean
+objcopy:
+	arm-none-eabi-objcopy -O binary bin/firmware.elf bin/firmware.bin
+
+flash:
+	stm32flash -w bin/firmware.bin -v $(PORT)
+
+.PHONY: all clean objcopy flash

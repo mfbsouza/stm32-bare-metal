@@ -18,3 +18,7 @@ At this [download link](https://www.st.com/resource/en/reference_manual/cd001711
 - Registers
 - Peripherals memory info
 - Circuit diagrams
+
+## STM32 Flash
+
+- [STM32 Flash Programmer](https://sourceforge.net/projects/stm32flash/)
