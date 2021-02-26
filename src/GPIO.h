@@ -4,6 +4,9 @@
  * 
  */
 
+#ifndef GPIO_H_
+#define GPIO_H_
+
 #include "common.h"
 #include "RCC.h"
 
@@ -20,23 +23,32 @@
 
 /* GPIO Parameters */
 
-#define LOW                 0x00
-#define HIGH                0x01
-#define OUTPUT_OPENDRAIN    0x07
-#define OUTPUT_PUSHPULL     0x08
+typedef enum {
+    LOW,
+    HIGH
+} gpio_value_t;
+
+typedef enum {
+    OUTPUT_OPENDRAIN,
+    OUTPUT_PUSHPULL
+} gpio_mode_t;
 
 /* GPIO Pins */
 
-#define PC10 0x2AU
-#define PC11 0x2BU
-#define PC12 0x2CU
-#define PC13 0x2DU
-#define PC14 0x2EU
-#define PC15 0x2FU
+typedef enum {
+    PC10 = 0x2A,
+    PC11 = 0x2B,
+    PC12 = 0x2C,
+    PC13 = 0x2D,
+    PC14 = 0x2E,
+    PC15 = 0x2F
+} gpio_pin_t;
 
 /* Functions */
 
-void    gpio_mode  ( uint8_t pin, uint8_t mode  );
-void    gpio_write ( uint8_t pin, uint8_t value );
-void    gpio_flip  ( uint8_t pin );
-uint8_t gpio_read  ( uint8_t pin );
+void    gpio_mode  ( gpio_pin_t pin, gpio_mode_t  mode  );
+void    gpio_write ( gpio_pin_t pin, gpio_value_t value );
+void    gpio_flip  ( gpio_pin_t pin );
+uint8_t gpio_read  ( gpio_pin_t pin );
+
+#endif //GPIO_H_

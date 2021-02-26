@@ -6,7 +6,7 @@ int main (void)
 {
     int i;
 
-    APB2_clock_enable(IOPCEN);
+    APB2_clock_enable(GPIOC);
     gpio_mode(PC13, OUTPUT_OPENDRAIN);
 
     while(1) {

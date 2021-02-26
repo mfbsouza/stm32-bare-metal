@@ -22,6 +22,9 @@
  * 
  */
 
+#ifndef RCC_H_
+#define RCC_H_
+
 #include "common.h"
 
 #define RCC_BASE_ADDR  0x40021000U
@@ -35,16 +38,20 @@
 
 /* Bit Positions */
 
-#define IOPAEN     2U // Port A clock enable bit position
-#define IOPBEN     3U // Port B clock enable bit position
-#define IOPCEN     4U // Port C clock enable bit position
-#define IOPDEN     5U // Port D clock enable bit position
-#define IOPEEN     6U // Port E clock enable bit position
-#define IOPFEN     7U // Port F clock enable bit position
-#define IOPGEN     8U // Port G clock enable bit position
-#define USART1EN  14U // USART1 clock enable bit position
-#define TIM1EN    11U // TIM1 clock enable bit position
+typedef enum {
+    GPIOA  = 0x02, // Port A clock enable bit position
+    GPIOB  = 0x03, // Port B clock enable bit position
+    GPIOC  = 0x04, // Port C clock enable bit position
+    GPIOD  = 0x05, // Port D clock enable bit position
+    GPIOE  = 0x06, // Port E clock enable bit position
+    GPIOF  = 0x07, // Port F clock enable bit position
+    GPIOG  = 0x08, // Port G clock enable bit position
+    TIM1   = 0x0B, // TIM1 clock enable bit position
+    USART1 = 0x0E  // USART1 clock enable bit position
+} rcc_peripheral_t;
 
 /* Functions */
 
-void APB2_clock_enable (uint32_t bit_position);
+void APB2_clock_enable (rcc_peripheral_t peripheral);
+
+#endif // RCC_H_

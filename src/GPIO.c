@@ -1,7 +1,7 @@
 #include "GPIO.h"
 
 inline void
-gpio_mode (uint8_t pin, uint8_t mode)
+gpio_mode (gpio_pin_t pin, gpio_mode_t mode)
 {
     uint8_t offset;
     volatile uint32_t *cr_reg;
@@ -23,7 +23,7 @@ gpio_mode (uint8_t pin, uint8_t mode)
 }
 
 inline void
-gpio_write (uint8_t pin, uint8_t value)
+gpio_write (gpio_pin_t pin, gpio_value_t value)
 {
     volatile uint32_t *odr_reg = (uint32_t *) ( (PORT_BASE_ADDR + (0x400 * BYTE_HIGH(pin))) + (GPIO_ODR_OFFSET) );
     
@@ -36,7 +36,7 @@ gpio_write (uint8_t pin, uint8_t value)
 }
 
 inline void
-gpio_flip ( uint8_t pin )
+gpio_flip ( gpio_pin_t pin)
 {
     volatile uint32_t *odr_reg = (uint32_t *) ( (PORT_BASE_ADDR + (0x400 * BYTE_HIGH(pin))) + (GPIO_ODR_OFFSET) );
 
@@ -44,7 +44,7 @@ gpio_flip ( uint8_t pin )
 }
 
 inline uint8_t
-gpio_read ( uint8_t pin )
+gpio_read ( gpio_pin_t pin)
 {
     uint8_t buffer;
     volatile uint32_t *idr_reg = (uint32_t *) ( (PORT_BASE_ADDR + (0x400 * BYTE_HIGH(pin))) + (GPIO_IDR_OFFSET) );
