@@ -11,7 +11,7 @@ int main (void)
 
     while(1) {
 
-        for(i = 0; i < 50000; i++);
+        for(i = 0; i < 100000; i++);
 
         gpio_flip(PC13);
     }
