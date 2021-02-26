@@ -1,5 +1,5 @@
 /**
- * init code objectives:
+ * startup code objectives:
  * 
  * 1. Create a vector table for the MCU based on the documentation
  * 2. Initializes .data and .bss section in the SRAM
