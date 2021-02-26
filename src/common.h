@@ -8,4 +8,13 @@
 #define uint16_t    unsigned short
 #define uint8_t     unsigned char
 
+/* Bitwise Operations */
+
+#define BIT_SET(REG, BIT_POS)  ( (REG) |= (1U << BIT_POS) )
+#define BIT_CLR(REG, BIT_POS)  ( (REG) &= ( ~(1U << BIT_POS) ) )
+#define BIT_FLIP(REG, BIT_POS) ( (REG) ^= (1U << BIT_POS) )
+
+#define BYTE_HIGH(DATA)        ( ((DATA & 0xF0) >> 4U) )
+#define BYTE_LOW(DATA)         ( (DATA & 0x0F) )
+
 #endif //COMMON_H_
