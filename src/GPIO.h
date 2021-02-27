@@ -98,4 +98,4 @@ gpio_read ( gpio_pin_t pin)
     return buffer;
 }
 
-#endif //GPIO_H_
+#endif // GPIO_H_

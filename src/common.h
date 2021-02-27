@@ -17,4 +17,4 @@
 #define BYTE_HIGH(DATA)        ( ((DATA & 0xF0) >> 4U) )
 #define BYTE_LOW(DATA)         ( (DATA & 0x0F) )
 
-#endif //COMMON_H_
+#endif // COMMON_H_
