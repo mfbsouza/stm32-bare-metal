@@ -22,16 +22,16 @@
 
 /* GPIO Macro functions */
 
-#define GET_OFFSET(PIN)  ( (PIN > 7) ? GPIO_CRH_OFFSET : GPIO_CRL_OFFSET )
+#define GET_CR_OFFSET(PIN)  ( (PIN > 7) ? GPIO_CRH_OFFSET : GPIO_CRL_OFFSET )
 
-/* GPIO Parameters */
+/* GPIO data types */
 
-typedef enum {
+typedef enum gpio_value_t {
     LOW,
     HIGH
 } gpio_value_t;
 
-typedef enum {
+typedef enum gpio_mode_t {
     OUTPUT_PUSHPULL  = 0x00,
     OUTPUT_OPENDRAIN = 0x01,
     ANALOG           = 0x00,
@@ -40,7 +40,7 @@ typedef enum {
     INPUT_PULLUP     = 0x12
 } gpio_mode_t;
 
-typedef enum {
+typedef enum gpio_speed_t {
     NOT_DEFINED,
     OUTPUT_10MHZ,
     OUTPUT_2MHZ,
@@ -49,7 +49,7 @@ typedef enum {
 
 /* GPIO Pins */
 
-typedef enum {
+typedef enum gpio_pin_t {
     PC10 = 0x2A,
     PC11 = 0x2B,
     PC12 = 0x2C,
@@ -58,43 +58,89 @@ typedef enum {
     PC15 = 0x2F
 } gpio_pin_t;
 
-/* Functions */
+/**
+ * Function: gpio_mode
+ * 
+ * Parameters: gpio pin | gpio mode | gpio speed
+ * 
+ * gpio_mode configures two registers (GPIOx_CR and GPIOx_ODR)
+ * according to the parameters
+ */
 
 static inline void
 gpio_mode ( gpio_pin_t pin, gpio_mode_t mode, gpio_speed_t speed )
 {
     volatile uint32_t *cr_reg, *odr_reg;
     
-    cr_reg = (uint32_t *) ( (PORT_BASE_ADDR + (0x400 * BYTE_HIGH(pin))) + (GET_OFFSET(BYTE_LOW(pin))) );
-    odr_reg = (uint32_t *) ( (PORT_BASE_ADDR + (0x400 * BYTE_HIGH(pin))) + (GPIO_ODR_OFFSET) );
+    // CR REG ADDRESS = GPIO_PORT_BASE_ADDR + PORT_x_OFFSET + CRH OR CRL OFFSET
+    cr_reg = (uint32_t *) ( PORT_BASE_ADDR + (BYTE_HIGH(pin) << 10) + (GET_CR_OFFSET(BYTE_LOW(pin))) );
     
-    // SET CNF[1:0] , MODE[1:0] and PxODR
-    REG_UPDATE(*cr_reg, (uint32_t)(mode & 0x0F), (uint32_t)0x3, (((BYTE_LOW(pin) % 8) * 4) + 2));
-    REG_UPDATE(*cr_reg, (uint32_t)speed, (uint32_t)0x3, ((BYTE_LOW(pin) % 8) * 4));
-    REG_UPDATE(*odr_reg, (uint32_t)((mode & 0xF0) >> 4), (uint32_t)0x1, BYTE_LOW(pin));
+    // ODR REG ADDRESS = GPIO_PORT_BASE_ADDR + PORT_x_OFFSET + ODR OFFSET
+    odr_reg = (uint32_t *) ( PORT_BASE_ADDR + (BYTE_HIGH(pin) << 10) + GPIO_ODR_OFFSET );
+    
+    // Set CNF[1:0], MODE[1:0] and PxODR according to the table 21 and 20 in the datasheet
+    REG_UPDATE( *cr_reg , BYTE_LOW(mode)  , TWOBITS, (((BYTE_LOW(pin) & 0x07) << 2) + 2) );
+    REG_UPDATE( *cr_reg , speed           , TWOBITS, ((BYTE_LOW(pin) & 0x07) << 2) );
+    REG_UPDATE( *odr_reg, BYTE_HIGH(mode) , ONEBIT , BYTE_LOW(pin) );
 }
 
-static inline void
-gpio_write (gpio_pin_t pin, gpio_value_t value)
-{
-    volatile uint32_t *odr_reg = (uint32_t *) ( (PORT_BASE_ADDR + (0x400 * BYTE_HIGH(pin))) + (GPIO_ODR_OFFSET) );
-    REG_UPDATE(*odr_reg, (uint32_t)value, (uint32_t)0x1, BYTE_LOW(pin));
-}
+/**
+ * Function: gpio_write
+ * 
+ * Parameters: gpio pin | gpio value
+ * 
+ * gpio_write takes a gpio value (high or low) and sets
+ * the gpio pin with that value
+ */
 
 static inline void
-gpio_flip ( gpio_pin_t pin)
+gpio_write ( gpio_pin_t pin, gpio_value_t value )
 {
-    volatile uint32_t *odr_reg = (uint32_t *) ( (PORT_BASE_ADDR + (0x400 * BYTE_HIGH(pin))) + (GPIO_ODR_OFFSET) );
+    volatile uint32_t *odr_reg;
+    
+    // ODR REG ADDRESS = GPIO_PORT_BASE_ADDR + PORT_x_OFFSET + ODR OFFSET
+    odr_reg = (uint32_t *) ( PORT_BASE_ADDR + (BYTE_HIGH(pin) << 10) + GPIO_ODR_OFFSET );
+
+    REG_UPDATE(*odr_reg, value, ONEBIT, BYTE_LOW(pin));
+}
+
+/**
+ * Function: gpio_flip
+ * 
+ * Parameters: gpio pin
+ * 
+ * gpio_flip inverts the output value of a given pin
+ */
+
+static inline void
+gpio_flip ( gpio_pin_t pin )
+{
+    volatile uint32_t *odr_reg;
+    
+    // ODR REG ADDRESS = GPIO_PORT_BASE_ADDR + PORT_x_OFFSET + ODR OFFSET
+    odr_reg = (uint32_t *) ( PORT_BASE_ADDR + (BYTE_HIGH(pin) << 10) + GPIO_ODR_OFFSET );
+
     BIT_FLIP( *odr_reg, BYTE_LOW(pin) );
 }
 
-static inline uint8_t
+/**
+ * Fcuntion: gpio_read
+ * 
+ * Parameters: gpio pin
+ * 
+ * gpio_read returns the gpio value of a given pin
+ */
+
+static inline gpio_value_t
 gpio_read ( gpio_pin_t pin)
 {
-    uint8_t buffer;
-    volatile uint32_t *idr_reg = (uint32_t *) ( (PORT_BASE_ADDR + (0x400 * BYTE_HIGH(pin))) + (GPIO_IDR_OFFSET) );
+    gpio_value_t buffer;
+    volatile uint32_t *idr_reg;
+    
+    // IDR REG ADDRESS = GPIO_PORT_BASE_ADDR + PORT_x_OFFSET + ODR OFFSET
+    idr_reg = (uint32_t *) ( PORT_BASE_ADDR + (BYTE_HIGH(pin) << 10) + GPIO_IDR_OFFSET );
 
-    buffer = ( ((uint8_t)(*idr_reg >> BYTE_LOW(pin))) & 0x01 );
+    buffer = (gpio_value_t) ((*idr_reg >> BYTE_LOW(pin)) & 0x01);
     return buffer;
 }
 

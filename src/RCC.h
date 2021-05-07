@@ -38,7 +38,7 @@
 
 /* Bit Positions */
 
-typedef enum {
+typedef enum rcc_peripheral_t {
     GPIOA  = 0x02, // Port A clock enable bit position
     GPIOB  = 0x03, // Port B clock enable bit position
     GPIOC  = 0x04, // Port C clock enable bit position
@@ -53,7 +53,7 @@ typedef enum {
 /* Functions */
 
 static inline void
-APB2_clock_enable (rcc_peripheral_t peripheral)
+APB2_clock_enable ( rcc_peripheral_t peripheral )
 {    
     volatile uint32_t *apb2_reg = (uint32_t *) (RCC_BASE_ADDR + RCC_APB2ENR);
     BIT_SET(*apb2_reg, peripheral);

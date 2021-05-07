@@ -17,4 +17,7 @@
 #define BYTE_HIGH(DATA)        ( ((DATA & 0xF0) >> 4U) )
 #define BYTE_LOW(DATA)         ( (DATA & 0x0F) )
 
+#define TWOBITS 0x3
+#define ONEBIT  0x1
+
 #endif // COMMON_H_
