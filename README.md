@@ -1,11 +1,12 @@
 # STM32F103xx "Blue Pill" Bare Metal Programing
 
-Bare metal programming of a STM32F103xx using Open Source GNU Toolchain
+Getting started with bare-metal programming on a STM32F103xx using Open Source GNU Toolchain
 
 ## Sections
 
 - [Quick Start](#quick-start)
 - [The Toolchain](#the-toolchain)
+- [Contributing](#contributing)
 
 ## Quick Start
 
@@ -36,8 +37,6 @@ put your STM32 in bootloader mode and just:
 change `/dev/ttyUSB0` for the right port in your PC
 
 
-
-
 ## The Toolchain
 
 - arm-none-eabi-gcc `(GNU C compiler for ARM)`
@@ -49,3 +48,7 @@ change `/dev/ttyUSB0` for the right port in your PC
 ### Opcional:
 
 - arm-none-eabi-objdump `(Verify ELF section headers and others)`
+
+## Contributing
+
+Please feel free to contribute to this project in anyway you may want (issues, pull request, ideas...). There is no template and anything will be welcome.
