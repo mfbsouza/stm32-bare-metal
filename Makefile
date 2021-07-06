@@ -1,45 +1,36 @@
-# Makefile by Matheus Souza (github.com/mfbsouza)
+TARGET = firmware
 
-# Project name
+BUILD_DIR = build
+BIN_DIR = bin
+SRC_DIR = src
 
-NAME = firmware
+SRCS = $(shell find $(SRC_DIR) -name *.c)
+OBJS = $(patsubst $(SRC_DIR)/%,$(BUILD_DIR)/%,$(SRCS:%=%.o))
+DEPS = $(OBJS:.o=.d)
 
-# Directory sctructure
-
-SRCDIR = src
-BUILDDIR = build
-BINDIR = bin
-SRCEXT = c
-SOURCES = $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
-OBJECTS = $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
-
-# Compiler & Linker settings
-
-# https://gcc.gnu.org/onlinedocs/gcc-10.2.0/gcc/ARM-Options.html#ARM-Options
 CC = arm-none-eabi-gcc
-CFLAGS = -Wall -O0 -mcpu=cortex-m3 -mthumb
+CFLAGS = -Wall -O0 -mcpu=cortex-m3 -mthumb -MMD -MP
 LDFLAGS = -nostdlib -T stm32f103xx_ls.ld -Wl,-Map=memory.map
 
-all: $(BINDIR)/$(NAME).bin $(BINDIR)/$(NAME).hex
+$(BIN_DIR)/$(TARGET): $(OBJS)
+	@mkdir -p $(BIN_DIR)
+	$(CC) $(OBJS) -o $@ $(LDFLAGS)
 
-$(BINDIR)/$(NAME).bin: $(BINDIR)/$(NAME).elf
-	arm-none-eabi-objcopy -O binary $< $@
+# c source
+$(BUILD_DIR)/%.c.o: $(SRC_DIR)/%.c
+	@mkdir -p $(BUILD_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
 
-$(BINDIR)/$(NAME).hex: $(BINDIR)/$(NAME).elf
-	arm-none-eabi-objcopy -O ihex $< $@
-
-$(BINDIR)/$(NAME).elf: $(OBJECTS)
-	@mkdir -p $(BINDIR)
-	$(CC) $(LDFLAGS) $^ -o $@
-
-$(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
-	@mkdir -p $(BUILDDIR)
-	$(CC) $(CFLAGS) -c $< -o $@ 
-
+.PHONY: clean
 clean:
-	rm -rf $(BUILDDIR) $(BINDIR) memory.map
+	rm -rf $(BUILD_DIR) $(BIN_DIR) memory.map
 
+.PHONY: flash
 flash:
-	stm32flash -w $(BINDIR)/$(NAME).bin -v $(PORT)
+	stm32flash -w $(BIN_DIR)/$(TARGET).bin -v $(PORT)
 
-.PHONY: all clean flash
+.PHONY: objcopy
+objcopy:
+	arm-none-eabi-objcopy -O binary $(BIN_DIR)/$(TARGET) $(BIN_DIR)/$(TARGET).bin
+
+-include $(DEPS)
