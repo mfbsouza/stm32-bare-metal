@@ -26,7 +26,7 @@
  * Reset_Handler will call main after initialization
  */
 
-void Reset_Handler (void);
+void Reset_Handler (void) __attribute__ ((section(".init"))) __attribute__ ((noreturn));
 extern int main (void);
 
 /* Functions prototype of STM32F103xx "Blue Pill" system exception and IRQ handlers */
@@ -103,11 +103,11 @@ void DMA2_Channel4_5_IRQHandler     (void) __attribute__ ((weak, alias("Default_
 
 /**
  * Creating the IVT or Vector Table and telling the compiler to
- * not put it in .data, instead put it in .isr_vector so later
+ * not put it in .data, instead put it in .vectors so later
  * the linker can copy it to the right address in the MCU memory.
  */
 
-uint32_t *vector_table[] __attribute__((section(".isr_vector"))) = {
+uint32_t *vector_table[] __attribute__((section(".vectors"))) = {
     (uint32_t *)STACK_START,
     (uint32_t *)Reset_Handler,
     (uint32_t *)NMI_Handler,
@@ -186,37 +186,33 @@ uint32_t *vector_table[] __attribute__((section(".isr_vector"))) = {
     (uint32_t *)DMA2_Channel4_5_IRQHandler
 };
 
-__attribute__ ((noreturn))
-void
-Reset_Handler (void)
+void Reset_Handler (void)
 {
     // getting the symbol defined at the linker script contaning memory info
 
-    extern uint32_t _end_text;
-    extern uint32_t _start_data;
-    extern uint32_t _end_data;
-    extern uint32_t _start_bss;
-    extern uint32_t _end_bss;
+    extern uint32_t _etext;
+    extern uint32_t _sdata;
+    extern uint32_t _edata;
+    extern uint32_t _sbss;
+    extern uint32_t _ebss;
+
+    uint32_t *src;
+    uint32_t *dest;
 
     // Copying .data section to SRAM
 
-    uint32_t size = (uint32_t)&_end_data - (uint32_t)&_start_data;
+    src = &_etext;      // FLASH
+    dest = &_sdata;     // SRAM
     
-    uint8_t *pDst = (uint8_t *)&_start_data; // SRAM
-    uint8_t *pSrc = (uint8_t *)&_end_text;   // FLASH
-
-    for (uint32_t byte_counter = 0; byte_counter < size; byte_counter++) {
-        *pDst++ = *pSrc++;
+    while (dest < &_edata) {
+        *(dest++) = *(src++);
     }
 
     // Initializing the .bss section to zero in the SRAM
 
-    size = (uint32_t)&_end_bss - (uint32_t)&_start_bss;
-    
-    pDst = (uint8_t *)&_start_bss;
-
-    for (uint32_t byte_counter = 0; byte_counter < size; byte_counter++) {
-        *pDst++ = 0;
+    dest = &_sbss;
+    while (dest < &_ebss) {
+        *(dest++) = 0;
     }
 
     // (Optional) Initialize libc
@@ -228,8 +224,7 @@ Reset_Handler (void)
     while(1);
 }
 
-void
-Default_Handler (void)
+void Default_Handler (void) 
 {
     while(1); // halt
 }

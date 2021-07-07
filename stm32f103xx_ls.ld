@@ -11,25 +11,26 @@ MEMORY
 SECTIONS
 {
     .text : {
-        *(.isr_vector)
+        *(.vectors)
+        *(.init)
         *(.text)
         *(.rodata)
         . = ALIGN(4);
-        _end_text = .;
+        _etext = .;
     }> FLASH
 
     .data : {
-        _start_data = .;
+        _sdata = .;
         *(.data)
         . = ALIGN(4);
-        _end_data = .;
+        _edata = .;
     }> SRAM AT> FLASH
 
     .bss : {
-        _start_bss = .;
+        _sbss = .;
         *(.bss)
         *(COMMON)
         . = ALIGN(4);
-        _end_bss = .;
+        _ebss = .;
     }> SRAM
 }
