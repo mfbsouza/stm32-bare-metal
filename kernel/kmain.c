@@ -1,6 +1,6 @@
-#include "common.h"
-#include "RCC.h"
-#include "GPIO.h"
+#include <common/int_types.h>
+#include <hal/rcc.h>
+#include <hal/gpio.h>
 
 int main (void)
 {

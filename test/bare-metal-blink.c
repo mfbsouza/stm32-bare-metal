@@ -1,8 +1,8 @@
 /**
- * Blink test code by Matheus Souza for the STM32F103xx
+ * Blink test code by Matheus Souza for the STM32F1xx
  */
 
-#include "common.h"
+#include <common/int_types.h>
 
 #define RCC_ADDR         0x40021000U
 #define RCC_CER_OFFSET   0x18U

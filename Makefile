@@ -1,36 +1,121 @@
-TARGET = firmware
+# Makefile by Matheus Souza (github.com/mfbsouza)
+# based on ChibiOS's Build System
 
-BUILD_DIR = build
-BIN_DIR = bin
-SRC_DIR = src
+# project name
 
-SRCS = $(shell find $(SRC_DIR) -name *.c)
-OBJS = $(patsubst $(SRC_DIR)/%,$(BUILD_DIR)/%,$(SRCS:%=%.o))
-DEPS = $(OBJS:.o=.d)
+PROJECT  := firmware
 
-CC = arm-none-eabi-gcc
-CFLAGS = -Wall -O0 -mcpu=cortex-m3 -mthumb -MMD -MP
-LDFLAGS = -nostdlib -T stm32f103xx_ls.ld -Wl,-Map=memory.map
+# paths
 
-$(BIN_DIR)/$(TARGET): $(OBJS)
-	@mkdir -p $(BIN_DIR)
-	$(CC) $(OBJS) -o $@ $(LDFLAGS)
+BUILDDIR := ./build
+OBJDIR   := $(BUILDDIR)/obj
+BINDIR   := $(BUILDDIR)/bin
+DEPDIR	 := $(BUILDDIR)/dep
 
-# c source
-$(BUILD_DIR)/%.c.o: $(SRC_DIR)/%.c
-	@mkdir -p $(BUILD_DIR)
-	$(CC) $(CFLAGS) -c $< -o $@
+# board configuration and startup code
 
-.PHONY: clean
+include ./arch/stm32f1/config.mk
+
+# sources to compile
+
+include ./kernel/sources.mk
+
+# compiler settings
+
+CC  := $(PREFIX)gcc
+AS  := $(PREFIX)gcc
+LD  := $(PREFIX)gcc
+CP  := $(PREFIX)objcopy
+OD  := $(PREFIX)objdump
+HEX := $(CP) -O ihex
+BIN := $(CP) -O binary
+
+CFLAGS   := -Wall -O0 $(ALLCFLAGS) -MMD -MP
+LDFLAGS  := $(ALLLDFLAGS)
+
+# sources
+
+CSRCS    := $(ALLCSRCS)
+ASMSRCS  := $(ALLASMSRCS)
+SRCPATHS := $(sort $(dir $(CSRCS)) $(dir $(ASMSRCS)))
+
+# objects
+
+COBJS   := $(addprefix $(OBJDIR)/, $(notdir $(CSRCS:.c=.o)))
+ASMOBJS := $(addprefix $(OBJDIR)/, $(notdir $(ASMOBJS:.s=.o)))
+OBJS    := $(COBJS) $(ASMOBJS)
+DEPS    := $(OBJS:.o=.d)
+
+# paths where to search for sources
+
+VPATH   = $(SRCPATHS)
+
+# output
+
+OUTFILES := \
+	$(BINDIR)/$(PROJECT).elf \
+	$(BINDIR)/$(PROJECT).hex \
+	$(BINDIR)/$(PROJECT).bin
+
+# targets
+
+all: $(OBJDIR) $(BINDIR) $(OBJS) $(OUTFILES)
+
+$(OBJDIR):
+	@mkdir -p $(OBJDIR)
+
+$(BINDIR):
+	@mkdir -p $(BINDIR)
+
+# target for c objects
+
+$(COBJS) : $(OBJDIR)/%.o : %.c
+ifeq ($(VERBOSE),1)
+	$(CC) -c $(CFLAGS) -I. $< -o $@
+else
+	@echo CC $<
+	@$(CC) -c $(CFLAGS) -I. $< -o $@
+endif
+
+# target for asm objects
+
+$(ASMOBJS) : $(OBJDIR)/%.o : %.s
+ifeq ($(VERBOSE),1)
+	$(AS) -c $(CFLAGS) $< -o $@
+else
+	@echo AS $<
+	@$(AS) -c $(CFLAGS) $< -o $@
+endif
+
+# target for ELF file
+
+$(BINDIR)/$(PROJECT).elf: $(OBJS)
+ifeq ($(VERBOSE),1)
+	$(LD) $(LDFLAGS) $(OBJS) -o $@
+else
+	@echo LD ./$@
+	@$(LD) $(LDFLAGS) $(OBJS) -o $@
+endif
+
+%.hex: %.elf
+ifeq ($(VERBOSE),1)
+	$(HEX) $< $@
+else
+	@echo HEX $@
+	@$(HEX) $< $@
+endif
+
+%.bin: %.elf
+ifeq ($(VERBOSE),1)
+	$(BIN) $< $@
+else
+	@echo BIN $@
+	@$(BIN) $< $@
+endif
+
 clean:
-	rm -rf $(BUILD_DIR) $(BIN_DIR) memory.map
+	rm -rf $(BUILDDIR)
 
-.PHONY: flash
-flash:
-	stm32flash -w $(BIN_DIR)/$(TARGET).bin -v $(PORT)
-
-.PHONY: objcopy
-objcopy:
-	arm-none-eabi-objcopy -O binary $(BIN_DIR)/$(TARGET) $(BIN_DIR)/$(TARGET).bin
+# Include the dependency files, should be the last of the makefile
 
 -include $(DEPS)

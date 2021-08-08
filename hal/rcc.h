@@ -25,7 +25,7 @@
 #ifndef RCC_H_
 #define RCC_H_
 
-#include "common.h"
+#include <common/int_types.h>
 
 #define RCC_BASE_ADDR  0x40021000U
 

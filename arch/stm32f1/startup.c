@@ -7,7 +7,7 @@
  * 4. Call main()
  */
 
-#include "common.h"
+#include <common/int_types.h>
 
 /**
  * Defining the start of the Stack
