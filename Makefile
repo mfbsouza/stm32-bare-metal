@@ -10,7 +10,6 @@ PROJECT  := firmware
 BUILDDIR := ./build
 OBJDIR   := $(BUILDDIR)/obj
 BINDIR   := $(BUILDDIR)/bin
-DEPDIR	 := $(BUILDDIR)/dep
 
 # board configuration and startup code
 
@@ -30,7 +29,7 @@ OD  := $(PREFIX)objdump
 HEX := $(CP) -O ihex
 BIN := $(CP) -O binary
 
-CFLAGS   := -Wall -O0 $(ALLCFLAGS) -MMD -MP
+CFLAGS   := -std=c99 -Wall -O0 $(ALLCFLAGS) -MMD -MP
 LDFLAGS  := $(ALLLDFLAGS)
 
 # sources

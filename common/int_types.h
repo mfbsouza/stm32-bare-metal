@@ -1,5 +1,5 @@
-#ifndef COMMON_H_
-#define COMMON_H_
+#ifndef INT_TYPES_H_
+#define INT_TYPES_H_
 
 #define int32_t     int
 #define int16_t     short
@@ -20,4 +20,4 @@
 #define TWOBITS 0x3
 #define ONEBIT  0x1
 
-#endif // COMMON_H_
+#endif // INT_TYPES_H_
